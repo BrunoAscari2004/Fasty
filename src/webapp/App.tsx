@@ -4,12 +4,11 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  Input,
   TextField,
   Toolbar,
   Typography,
 } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FaRegImage, FaRegPlusSquare } from "react-icons/fa";
 interface ICar {
   id: string;
@@ -29,11 +28,11 @@ interface ILap {
 function App() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedImage, setSelectImage] = useState<File | null>(null);
 
   const onCarInputSubmit = async (data: ICar) => {};
 
   //File opening
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const filesInputRef = useRef<HTMLInputElement>(null);
 
@@ -45,7 +44,7 @@ function App() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
+      setSelectImage(event.target.files[0]);
     }
   };
   /////////////////////////
@@ -63,28 +62,71 @@ function App() {
 
       <div className="flex justify-end mr-5">
         <Button
-          style={{ border: "2px solid rgb(32, 116, 212)", borderRadius: "10px" }}
+          style={{
+            border: "2px solid rgb(32, 116, 212)",
+            borderRadius: "10px",
+          }}
           onClick={() => setDialogOpen(true)}
         >
           <FaRegPlusSquare className="h-6 w-6 mr-3" />
           <div className="mt-0.5">Novo Carro</div>
         </Button>
       </div>
-
-      <div></div>
+      <div className=""></div>
 
       <Dialog open={!!dialogOpen} fullWidth maxWidth="md">
         <DialogTitle>Adicionar carro</DialogTitle>
         <DialogContent>
           <form onSubmit={(data) => onCarInputSubmit(data)}>
-            <div className="flex justify-end mr-32 py-20 mb-10">
-              <div></div>
-              <div className="flex flex-col gap-3">
-                <TextField label="Modelo" style={{ marginBottom: "5px" }} size="small" placeholder="Modelo" />
-                <input ref={filesInputRef} type="file" style={{ display: "none" }} onChange={handleFileChange} />
+            <div className="flex justify-end mr-28 py-10 mb-10 ">
+              <div className="mr-40">
+                {selectedImage ? (
+                  <img
+                    src={URL.createObjectURL(selectedImage)}
+                    alt="Selected"
+                    style={{
+                      maxWidth: "350px",
+                      maxHeight: "250px",
+                      width: "320px",
+                      height: "250px",
+                      objectFit: "cover",
+                      marginLeft: "40px",
+                      borderRadius: "10px",
+                    }}
+                  />
+                ) : (
+                  <img
+                    alt="Foto de Capa"
+                    style={{
+                      backgroundColor: "rgb(224,224,224)",
+                      maxWidth: "350px",
+                      maxHeight: "250px",
+                      width: "320px",
+                      height: "250px",
+                      borderRadius: "10px",
+                      textAlign: "center",
+                      lineHeight: "200px",
+                      marginLeft: "40px",
+                    }}
+                  />
+                )}
+              </div>
+              <div className="flex flex-col gap-3 justify-center">
+                <TextField label="Modelo" size="small" placeholder="Modelo" />
+                <input
+                  ref={filesInputRef}
+                  accept="image/*"
+                  type="file"
+                  style={{ display: "none" }}
+                  onChange={handleFileChange}
+                />
                 <Button
                   onClick={handleFileUploadClick}
-                  style={{ textTransform: "capitalize", width: "180px", marginLeft: "20px" }}
+                  style={{
+                    textTransform: "capitalize",
+                    width: "180px",
+                    marginLeft: "20px",
+                  }}
                 >
                   <FaRegImage className="h-5 w-5 mr-3 mb-1" />
                   <div>Fazer Upload</div>
@@ -92,10 +134,22 @@ function App() {
               </div>
             </div>
             <div className="flex justify-end gap-3">
-              <Button style={{ border: "1px solid rgb(32, 116, 212)" }} onClick={() => setDialogOpen(false)}>
+              <Button
+                style={{ border: "1px solid rgb(32, 116, 212)" }}
+                onClick={() => {
+                  setDialogOpen(false);
+                  setTimeout(() => {
+                    setSelectImage(null);
+                  }, 300);
+                }}
+              >
                 Cancelar
               </Button>
-              <Button style={{ color: "white", backgroundColor: "rgb(32, 116, 212)" }}>Adicionar</Button>
+              <Button
+                style={{ color: "white", backgroundColor: "rgb(32, 116, 212)" }}
+              >
+                Adicionar
+              </Button>
             </div>
           </form>
         </DialogContent>
