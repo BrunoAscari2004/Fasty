@@ -9,26 +9,32 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 import { FaRegImage, FaRegPlusSquare } from "react-icons/fa";
-import ICar from "../../@types/ICar";
+import ICarForm from "../../@types/ICarForm";
+import { saveCar } from "./fastySlice";
+import { IAppDispatch } from "../../store";
 
-function App() {
+const Fasty: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectImage] = useState<File | null>(null);
 
-  const onCarInputSubmit = async (data: ICar) => {};
+  const dispatch: IAppDispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const carData: ICar = {
-      id: "",
-      model: formData.get("Modelo") as string,
-      imageUrl: "",
-    };
 
-    await onCarInputSubmit(carData);
+    const formData = new FormData(e.currentTarget);
+
+    const carData: ICarForm = {
+      model: formData.get("Modelo") as string,
+      imageUrl: selectedImage ? URL.createObjectURL(selectedImage) : "",
+    };
+    dispatch(saveCar(carData));
+
+    setSelectImage(null);
+    setDialogOpen(false);
   };
 
   //File opening
@@ -156,6 +162,6 @@ function App() {
       </Dialog>
     </>
   );
-}
+};
 
-export default App;
+export default Fasty;
