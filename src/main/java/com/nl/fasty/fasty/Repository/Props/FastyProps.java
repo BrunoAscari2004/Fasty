@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FastyProps  implements Serializable  {
-
+    
     private static final long serialVersionUID = -6579693513689216394L;
 
     @Value("/home/bruno.ascari@intranetnl.com.br/Documentos/Treinamento/Fasty/react-fasty/src/webapp")
