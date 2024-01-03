@@ -22,7 +22,6 @@ import ICarForm from "../../@types/ICarForm";
 
 const Fasty: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedImage, setSelectImage] = useState<File | null>(null);
   const [itemData, setItemData] = useState<ICarForm[]>([]);
   const [isClickedIndex, setIsClickedIndex] = useState<number | null>(null);
@@ -44,22 +43,44 @@ const Fasty: React.FC = () => {
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
-        console.log(base64String);
 
         localStorage.setItem("selectedImage", base64String);
         localStorage.setItem("carModel", carData.model);
 
         carData.imageUrl = base64String;
         setSelectImage(null);
-        setDialogOpen(false);
       };
       reader.readAsDataURL(selectedImage);
-    } else {
-      setDialogOpen(false);
     }
-    console.log(carData.imageUrl);
-    console.log(carData.model);
-    setItemData((prevItemData) => [...prevItemData, carData]);
+
+    if (isClickedIndex !== null) {
+      const formData = new FormData(e.currentTarget);
+
+      const updateItemData = itemData.map((item, index) => {
+        if (index === isClickedIndex) {
+          return {
+            ...item,
+            model: formData.get("Modelo") as string,
+            imageUrl: selectedImage
+              ? URL.createObjectURL(selectedImage)
+              : item.imageUrl,
+          };
+        }
+        return item;
+      });
+      setItemData(updateItemData);
+    } else {
+      const formData = new FormData(e.currentTarget);
+
+      const carData: ICarForm = {
+        model: formData.get("Modelo") as string,
+        imageUrl: selectedImage ? URL.createObjectURL(selectedImage) : "",
+      };
+      setItemData((prevItemData) => [...prevItemData, carData]);
+    }
+    setIsClickedIndex(null);
+    setDialogOpen(false);
+    setDialogFormData(null);
   };
 
   //File opening
@@ -83,9 +104,17 @@ const Fasty: React.FC = () => {
     setIsClickedIndex(index);
     setDialogFormData(itemData[index]);
     setDialogOpen(true);
-    setTimeout(() => {
-      setIsClickedIndex(null);
-    }, 300);
+  };
+
+  const handleDelete = (index: number) => {
+    if (index === 0) {
+      itemData.shift();
+    } else {
+      itemData.splice(index, index);
+    }
+    setIsClickedIndex(null);
+    setDialogFormData(null);
+    setDialogOpen(false);
   };
 
   return (
@@ -152,7 +181,17 @@ const Fasty: React.FC = () => {
       </div>
 
       <Dialog open={!!dialogOpen} fullWidth maxWidth="md">
-        <DialogTitle>Adicionar carro</DialogTitle>
+        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
+          Adicionar carro
+          {isClickedIndex !== null && (
+            <Button
+              sx={{ color: "red", border: "1px solid red" }}
+              onClick={() => handleDelete(isClickedIndex)}
+            >
+              Excluir
+            </Button>
+          )}
+        </DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <div className="flex justify-end mr-28 py-10 mb-10 ">
@@ -173,6 +212,7 @@ const Fasty: React.FC = () => {
                   />
                 ) : (
                   <img
+                    src={dialogFormData?.imageUrl}
                     alt="Foto de Capa"
                     style={{
                       backgroundColor: "rgb(224,224,224)",
@@ -182,6 +222,8 @@ const Fasty: React.FC = () => {
                       height: "250px",
                       borderRadius: "10px",
                       textAlign: "center",
+                      objectFit: "cover",
+
                       lineHeight: "200px",
                       marginLeft: "40px",
                     }}
@@ -195,6 +237,15 @@ const Fasty: React.FC = () => {
                   size="small"
                   placeholder="Modelo"
                   value={dialogFormData?.model}
+                  onChange={(e) => {
+                    const updatedModel = e.target.value;
+                    setDialogFormData((prevData) => {
+                      if (prevData) {
+                        return { ...prevData, model: updatedModel };
+                      }
+                      return { model: updatedModel, imageUrl: "" };
+                    });
+                  }}
                 />
                 <input
                   ref={filesInputRef}
@@ -221,10 +272,11 @@ const Fasty: React.FC = () => {
                 style={{ border: "1px solid rgb(32, 116, 212)" }}
                 onClick={() => {
                   setDialogOpen(false);
-                  setDialogFormData(null);
                   setTimeout(() => {
+                    setDialogFormData(null);
                     setSelectImage(null);
-                  }, 300);
+                  }, 400);
+                  setIsClickedIndex(null);
                 }}
               >
                 Cancelar
