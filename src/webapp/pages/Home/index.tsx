@@ -26,6 +26,7 @@ const Fasty: React.FC = () => {
   const [itemData, setItemData] = useState<ICarForm[]>([]);
   const [isClickedIndex, setIsClickedIndex] = useState<number | null>(null);
   const [dialogFormData, setDialogFormData] = useState<ICarForm | null>(null);
+  const [qntCarros, setQntCarros] = useState<number>(0);
 
   //const dispatch: IAppDispatch = useDispatch();
 
@@ -83,6 +84,10 @@ const Fasty: React.FC = () => {
     setDialogFormData(null);
   };
 
+  useEffect(() => {
+    setQntCarros(itemData.length);
+  });
+
   //File opening
 
   const filesInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +133,60 @@ const Fasty: React.FC = () => {
       </AppBar>
       <div className="mt-2 ml-5 text-xl">Resumo da Corrida</div>
 
-      <div className="flex justify-end mr-5">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          position: "relative",
+          height: `${72 * qntCarros + 40}px`,
+          marginTop: "20px",
+        }}
+      >
+        <Paper
+          elevation={3}
+          sx={{
+            p: 0,
+            height: `${72 * qntCarros + 40}px`,
+            width: "1800px",
+            marginLeft: "50px",
+          }}
+        >
+          <div
+            style={{
+              marginTop: "10px",
+              marginLeft: "12px",
+              color: "rgb(32, 116, 212)",
+            }}
+          >
+            Melhores Voltas
+          </div>
+
+          {itemData.map((item, index) => (
+            <div
+              key={index}
+              style={{
+                top: index * 70 + 50,
+                left: index * 10 + 80,
+                position: "absolute",
+              }}
+            >
+              <div>
+                <img
+                  src={item.imageUrl}
+                  style={{
+                    height: "60px",
+                    width: "65px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </Paper>
+      </div>
+
+      <div className="flex justify-end mr-5 mt-10">
         <Button
           style={{
             border: "2px solid rgb(32, 116, 212)",
